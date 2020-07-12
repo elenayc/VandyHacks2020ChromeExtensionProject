@@ -1,5 +1,5 @@
 console.log("background works");
-var dbName = 'todos-vanillajs';
+var waterNotification = "water-notification";
 
 chrome.runtime.onStartup.addListener(function() {
   function launch() {
@@ -8,30 +8,32 @@ chrome.runtime.onStartup.addListener(function() {
     });
   }
 
-  function showNotification(storedData) {
-    var openTodos = 0;
-    if ( storedData[dbName].todos ) {
-      storedData[dbName].todos.forEach(function(todo) {
-        if ( !todo.completed ) {
-        openTodos++;
-        }
-      });
-    }
-    if (openTodos>0) {
-    // Now create the notification
-      chrome.notifications.create('reminder', {
-        type: 'basic',
-        iconUrl: 'icon_128.png',
-        title: 'Don\'t forget!',
-        message: 'You have '+openTodos+' things to do. Wake up, dude!'
-      }, function(notificationId) {});
-    }
-  }
+  // Add a method when a alarm is triggerd
+  browser.alarms.onAlarm.addListener(handleAlarm);
+
+
+  // Create the basic notification
+function createNoti(){
+
+  chrome.notifications.create(cakeNotification, {
+    "type": "basic",
+    "iconUrl": browser.extension.getURL("icons/icon-96.png"),
+    "title": "Time for a break!",
+    "message": "Have you had water recently?"
+  });
 
   chrome.runtime.onStartup.addListener(launch);
   chrome.alarms.onAlarm.addListener(function( alarm ) {
     chrome.storage.local.get(dbName, showNotification);
   });
+
+  // when the alarm is triggerd print the alarm name and create the notification call
+  function handleAlarm(alarmInfo) {
+    console.log("on alarm: " + alarmInfo.name);
+  	createNoti();
+  }
+
+}
 
   chrome.notifications.onClicked.addListener(function() {
   launch();
